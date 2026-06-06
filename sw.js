@@ -1,5 +1,5 @@
-const CACHE_NAME = "potsuri-v15";
-const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "potsuri-v16";
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./apple-touch-icon.png", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
