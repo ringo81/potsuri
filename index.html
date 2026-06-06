@@ -1,0 +1,1878 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f7f7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ぽつり" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>ぽつり</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --page: #f5f5f5;
+        --sheet: #fbfbfb;
+        --card: #ffffff;
+        --ink: #181d1f;
+        --soft-ink: #536064;
+        --muted: #9aa4a7;
+        --line: #edf1f1;
+        --accent: #abd9df;
+        --accent-strong: #86c2ca;
+        --accent-soft: #e8f5f6;
+        --shadow: 0 12px 30px rgba(38, 53, 57, 0.08);
+        --shadow-soft: 0 8px 22px rgba(38, 53, 57, 0.06);
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
+        font-weight: 300;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--page);
+      }
+
+      body {
+        min-height: 100svh;
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+      }
+
+      button,
+      textarea,
+      input {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button:focus {
+        outline: 0;
+      }
+
+      button:focus-visible,
+      textarea:focus-visible,
+      .file-pill:focus-within,
+      input:focus-visible {
+        outline: 3px solid rgba(134, 194, 202, 0.34);
+        outline-offset: 3px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      .app {
+        position: relative;
+        width: min(100%, 430px);
+        min-height: 100svh;
+        margin: 0 auto;
+        padding: max(26px, env(safe-area-inset-top)) 0 max(94px, env(safe-area-inset-bottom));
+        overflow: hidden;
+      }
+
+      .top {
+        padding: 0 24px 28px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 58px;
+      }
+
+      .title-block {
+        min-width: 0;
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .header-actions {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .profile-avatar,
+      .settings-avatar {
+        display: grid;
+        flex: 0 0 auto;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #2f555b;
+      }
+
+      .profile-avatar {
+        width: 44px;
+        aspect-ratio: 1;
+        font-size: 18px;
+      }
+
+      .profile-avatar img,
+      .settings-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .icon-button {
+        display: grid;
+        flex: 0 0 auto;
+        width: 46px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--card);
+        box-shadow: var(--shadow-soft);
+      }
+
+      h1 {
+        font-size: 30px;
+        font-weight: 300;
+        letter-spacing: 0;
+        line-height: 1.15;
+      }
+
+      .subtitle {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 300;
+        line-height: 1.5;
+      }
+
+      .fab {
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--card);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .date-strip {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 7px;
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      .date-item {
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        padding: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #15191b;
+        font-size: 13px;
+        line-height: 1;
+      }
+
+      .date-item span:first-child {
+        color: #7f898b;
+        font-size: 11px;
+        font-weight: 300;
+      }
+
+      .date-item .date-number,
+      .month-day .date-number {
+        display: grid;
+        width: 34px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 999px;
+      }
+
+      .date-item.today .date-number,
+      .month-day.today .date-number {
+        background: var(--accent);
+      }
+
+      .date-item.selected .date-number,
+      .month-day.selected .date-number {
+        box-shadow: inset 0 0 0 2px #6aaab3;
+      }
+
+      .date-item.marked:not(.today) .date-number,
+      .month-day.marked:not(.today) .date-number {
+        background: color-mix(in srgb, var(--accent) 44%, white);
+      }
+
+      .date-number {
+        position: relative;
+      }
+
+      .calendar-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 220ms ease, margin-top 220ms ease;
+      }
+
+      .calendar-panel.open {
+        max-height: 388px;
+        margin-top: 18px;
+      }
+
+      .calendar-scroll {
+        display: grid;
+        grid-auto-columns: minmax(312px, 100%);
+        grid-auto-flow: column;
+        gap: 14px;
+        scroll-snap-type: x mandatory;
+        overflow-x: auto;
+        padding: 4px 2px 16px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .calendar-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      .month-card {
+        scroll-snap-align: center;
+        padding: 18px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .month-title {
+        margin-bottom: 16px;
+        color: var(--soft-ink);
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px 6px;
+      }
+
+      .month-weekday {
+        color: var(--muted);
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .month-day {
+        display: grid;
+        min-height: 35px;
+        place-items: center;
+        padding: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #202527;
+        font-size: 12px;
+      }
+
+      .month-day.outside {
+        color: #c3ccce;
+      }
+
+      .sheet {
+        min-height: calc(100svh - 188px);
+        padding: 14px 22px 96px;
+        border-radius: 24px 24px 0 0;
+        background: var(--sheet);
+        box-shadow: 0 -10px 30px rgba(36, 48, 52, 0.06);
+      }
+
+      .grabber {
+        display: block;
+        width: 36px;
+        height: 18px;
+        margin: 0 auto 22px;
+        padding: 7px 0;
+        border: 0;
+        border-radius: 99px;
+        background: transparent;
+        cursor: ns-resize;
+      }
+
+      .grabber:focus-visible {
+        outline: 0;
+      }
+
+      .grabber::before {
+        display: block;
+        width: 36px;
+        height: 4px;
+        margin: 0 auto;
+        border-radius: 99px;
+        background: #e0e0e0;
+        content: "";
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 0;
+      }
+
+      .count {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .composer,
+      .reply,
+      .history {
+        margin-bottom: 18px;
+      }
+
+      .card {
+        border-radius: 16px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+      }
+
+      .composer {
+        display: none;
+        padding: 20px;
+      }
+
+      .composer.open {
+        display: block;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 132px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        outline: 0;
+        border-radius: 16px;
+        padding: 16px;
+        color: var(--ink);
+        background: #ffffff;
+        font-size: 15px;
+        font-weight: 300;
+        line-height: 1.8;
+      }
+
+      textarea::placeholder {
+        color: #b1babc;
+      }
+
+      .photo-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        margin-top: 14px;
+      }
+
+      .file-pill {
+        position: relative;
+        display: inline-flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        overflow: hidden;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #375b60;
+        font-size: 13px;
+      }
+
+      .file-pill input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+      }
+
+      .file-name {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .preview {
+        display: none;
+        width: 100%;
+        max-height: 220px;
+        margin-top: 14px;
+        border-radius: 16px;
+        object-fit: cover;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 44px;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .primary-button,
+      .ghost-button {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 999px;
+      }
+
+      .primary-button {
+        background: var(--accent);
+        color: #132f34;
+        font-size: 14px;
+      }
+
+      .ghost-button {
+        background: #f7f9f9;
+        color: var(--soft-ink);
+      }
+
+      .reply {
+        display: none;
+        padding: 18px;
+      }
+
+      .reply.show {
+        display: block;
+      }
+
+      .label {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 999px;
+        color: #668286;
+        background: var(--accent-soft);
+        font-size: 11px;
+      }
+
+      .reply-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .reply-card p {
+        color: #283235;
+        font-size: 14px;
+        line-height: 1.85;
+      }
+
+      .steps {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+        align-items: start;
+        color: var(--soft-ink);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .num {
+        display: grid;
+        width: 28px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #5a7c82;
+        font-size: 12px;
+      }
+
+      .history-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .empty {
+        padding: 22px;
+        border-radius: 16px;
+        color: var(--muted);
+        background: #ffffff;
+        box-shadow: var(--shadow-soft);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .entry {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) 38px;
+        gap: 14px;
+        align-items: start;
+        min-width: 0;
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+      }
+
+      .entry-thumb {
+        display: grid;
+        width: 42px;
+        aspect-ratio: 1;
+        place-items: center;
+        overflow: hidden;
+        border: 0;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #32565b;
+      }
+
+      .entry-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .entry-thumb .icon {
+        width: 21px;
+        height: 21px;
+      }
+
+      .entry-body {
+        min-width: 0;
+      }
+
+      .entry-text {
+        overflow: hidden;
+        color: #171d1f;
+        font-size: 14px;
+        font-weight: 300;
+        line-height: 1.6;
+      }
+
+      .entry-meta {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        color: #8da0a4;
+        background: #eef5f5;
+        font-size: 10px;
+      }
+
+      .entry-advice {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        background: #f5fbfb;
+        color: var(--soft-ink);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .entry-advice strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #5d858b;
+        font-size: 11px;
+        font-weight: 300;
+      }
+
+      .entry-actions {
+        display: grid;
+        gap: 9px;
+      }
+
+      .share-button,
+      .delete-button {
+        display: grid;
+        width: 38px;
+        aspect-ratio: 1;
+        place-items: center;
+        border-radius: 999px;
+        background: #f5fbfb;
+        color: #446b72;
+      }
+
+      .delete-button {
+        color: #a06d68;
+        background: #fff5f3;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        z-index: 8;
+        display: none;
+        align-items: end;
+        justify-content: center;
+        background: rgba(35, 44, 47, 0.18);
+        padding: 18px;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .settings-panel {
+        width: min(100%, 390px);
+        max-height: min(86svh, 680px);
+        overflow-y: auto;
+        padding: 22px;
+        border-radius: 24px;
+        background: var(--card);
+        box-shadow: 0 18px 46px rgba(28, 39, 43, 0.18);
+      }
+
+      .settings-head,
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .settings-head {
+        margin-bottom: 22px;
+      }
+
+      .settings-head h2 {
+        font-size: 18px;
+      }
+
+      .settings-avatar {
+        width: 64px;
+        aspect-ratio: 1;
+        font-size: 24px;
+      }
+
+      .settings-form {
+        display: grid;
+        gap: 18px;
+      }
+
+      .field {
+        display: grid;
+        gap: 9px;
+      }
+
+      .field label,
+      .field-title {
+        color: var(--soft-ink);
+        font-size: 12px;
+      }
+
+      .text-input {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0 14px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      .avatar-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .theme-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      .theme-button,
+      .entry-icon-button {
+        display: grid;
+        min-height: 46px;
+        place-items: center;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .theme-button.selected,
+      .entry-icon-button.selected {
+        box-shadow: inset 0 0 0 2px var(--accent-strong);
+      }
+
+      .entry-icon-options {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+      }
+
+      .composer-icon-options {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 9px;
+        margin-top: 14px;
+      }
+
+      .swatch {
+        width: 24px;
+        aspect-ratio: 1;
+        border-radius: 999px;
+      }
+
+      .settings-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 4px;
+      }
+
+      .share-preview {
+        width: 100%;
+        min-height: 220px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px;
+        background: #fbfdfd;
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .share-image-preview {
+        width: 100%;
+        border-radius: 18px;
+        background: #f6fbfb;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .fab {
+        position: fixed;
+        right: max(24px, calc((100vw - 430px) / 2 + 24px));
+        bottom: calc(24px + env(safe-area-inset-bottom));
+        z-index: 3;
+        width: 54px;
+        aspect-ratio: 1;
+        background: var(--accent);
+        color: #10272b;
+        box-shadow: 0 12px 24px rgba(86, 138, 146, 0.28);
+      }
+
+      .fab .icon {
+        width: 24px;
+        height: 24px;
+        stroke-width: 1.7;
+      }
+
+      .fab.hidden {
+        display: none;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(92px + env(safe-area-inset-bottom));
+        z-index: 4;
+        width: min(calc(100% - 40px), 360px);
+        padding: 13px 16px;
+        border-radius: 999px;
+        color: #244246;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        text-align: center;
+        transform: translate(-50%, 12px);
+        transition: 180ms ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      @media (max-width: 360px) {
+        .top {
+          padding-inline: 20px;
+        }
+
+        h1 {
+          font-size: 27px;
+        }
+
+        .sheet {
+          padding-inline: 18px;
+        }
+
+        .photo-row,
+        .actions {
+          grid-template-columns: 1fr;
+        }
+
+        .ghost-button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div class="toolbar">
+          <div class="title-row">
+            <div class="title-block">
+              <h1>ぽつり</h1>
+              <p class="subtitle" id="subtitle">今日のつまずきを、そっと次の一歩に。</p>
+            </div>
+            <div class="header-actions">
+              <div class="profile-avatar" id="profileAvatar" aria-hidden="true">ぽ</div>
+              <button class="icon-button" id="settingsButton" type="button" aria-label="設定を開く">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                  <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 0 1-4 0V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 0 1 4.2 17l.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1H2.8a2 2 0 0 1 0-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7A2 2 0 0 1 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6V2.8a2 2 0 0 1 4 0V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 0 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2a2 2 0 0 1 0 4H21a1.7 1.7 0 0 0-1.6 1Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="date-strip" id="dateStrip" aria-label="今週の日付"></div>
+        <section class="calendar-panel" id="calendarPanel" aria-label="記録カレンダー">
+          <div class="calendar-scroll" id="calendarGrid"></div>
+        </section>
+      </header>
+
+      <main class="sheet">
+        <button class="grabber" id="calendarHandle" type="button" aria-label="カレンダーを開く"></button>
+        <div class="section-head">
+          <h2 id="filterTitle">すべて</h2>
+        </div>
+
+        <section class="composer card" id="composerPanel" aria-labelledby="composerTitle">
+          <div class="section-head">
+            <h2 id="composerTitle">今日のミス</h2>
+            <span class="count" id="charCount">0文字</span>
+          </div>
+
+          <textarea id="mistakeText" placeholder="例：急いでいて確認を忘れ、資料に誤字を残してしまった。"></textarea>
+
+          <div class="composer-icon-options" id="composerIconOptions" aria-label="記録アイコンを選ぶ">
+            <button class="entry-icon-button" type="button" data-entry-icon="pen" aria-label="ペン"></button>
+            <button class="entry-icon-button" type="button" data-entry-icon="heart" aria-label="ハート"></button>
+            <button class="entry-icon-button" type="button" data-entry-icon="sparkle" aria-label="きらめき"></button>
+            <button class="entry-icon-button" type="button" data-entry-icon="leaf" aria-label="葉"></button>
+            <button class="entry-icon-button" type="button" data-entry-icon="moon" aria-label="月"></button>
+          </div>
+
+          <div class="photo-row">
+            <label class="file-pill" for="photoInput">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h3l2-3h6l2 3h3v13H4Z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+              写真
+              <input id="photoInput" type="file" accept="image/*" />
+            </label>
+            <div class="file-name" id="fileName">未選択</div>
+          </div>
+
+          <img class="preview" id="preview" alt="選択した写真のプレビュー" />
+
+          <div class="actions">
+            <button class="primary-button" id="sendButton" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m22 2-7 20-4-9-9-4Z" />
+                <path d="M22 2 11 13" />
+              </svg>
+              励ましをもらう
+            </button>
+            <button class="ghost-button" id="hideComposerButton" type="button" aria-label="記録欄を閉じる" title="記録欄を閉じる">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <section class="reply card" id="replyPanel" aria-live="polite">
+          <div class="reply-card">
+            <span class="label">あなたへの返事</span>
+            <p id="encourageText"></p>
+            <ul class="steps" id="stepsList"></ul>
+          </div>
+        </section>
+
+        <section class="history" aria-labelledby="historyTitle">
+          <div class="section-head">
+            <h2 id="historyTitle">最近の記録</h2>
+            <span class="count" id="historyCount">0件</span>
+          </div>
+          <div class="history-list" id="historyList">
+            <p class="empty">まだ記録はありません。小さな失敗も、ここでは次に進む材料です。</p>
+          </div>
+        </section>
+      </main>
+
+      <button class="fab" id="fabButton" type="button" aria-label="新しく記録する">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal" id="settingsModal" aria-hidden="true">
+      <section class="settings-panel" aria-labelledby="settingsTitle">
+        <div class="settings-head">
+          <h2 id="settingsTitle">設定</h2>
+          <button class="ghost-button" id="closeSettingsButton" type="button" aria-label="設定を閉じる">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="settings-form">
+          <div class="settings-row">
+            <div class="settings-avatar" id="settingsAvatar">ぽ</div>
+            <div class="avatar-actions">
+              <label class="file-pill" for="avatarInput">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h3l2-3h6l2 3h3v13H4Z" />
+                  <circle cx="12" cy="13" r="3.5" />
+                </svg>
+                写真
+                <input id="avatarInput" type="file" accept="image/*" />
+              </label>
+              <button class="ghost-button" id="clearAvatarButton" type="button">消す</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="nameInput">名前</label>
+            <input class="text-input" id="nameInput" type="text" maxlength="16" placeholder="あなた" />
+          </div>
+
+          <div class="field">
+            <div class="field-title">テーマカラー</div>
+            <div class="theme-options" id="themeOptions">
+              <button class="theme-button" type="button" data-theme="blue" aria-label="水色">
+                <span class="swatch" style="background:#abd9df"></span>
+              </button>
+              <button class="theme-button" type="button" data-theme="sage" aria-label="セージ">
+                <span class="swatch" style="background:#bed8c6"></span>
+              </button>
+              <button class="theme-button" type="button" data-theme="peach" aria-label="桃色">
+                <span class="swatch" style="background:#f0c7bd"></span>
+              </button>
+              <button class="theme-button" type="button" data-theme="lavender" aria-label="ラベンダー">
+                <span class="swatch" style="background:#d0c7ec"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-title">記録アイコン</div>
+            <div class="entry-icon-options" id="entryIconOptions">
+              <button class="entry-icon-button" type="button" data-entry-icon="pen" aria-label="ペン"></button>
+              <button class="entry-icon-button" type="button" data-entry-icon="heart" aria-label="ハート"></button>
+              <button class="entry-icon-button" type="button" data-entry-icon="sparkle" aria-label="きらめき"></button>
+              <button class="entry-icon-button" type="button" data-entry-icon="leaf" aria-label="葉"></button>
+              <button class="entry-icon-button" type="button" data-entry-icon="moon" aria-label="月"></button>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="ghost-button" id="cancelSettingsButton" type="button">戻る</button>
+            <button class="primary-button" id="saveSettingsButton" type="button">保存</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal" id="shareModal" aria-hidden="true">
+      <section class="settings-panel" aria-labelledby="shareTitle">
+        <div class="settings-head">
+          <h2 id="shareTitle">共有プレビュー</h2>
+          <button class="ghost-button" id="closeShareButton" type="button" aria-label="共有プレビューを閉じる">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="settings-form">
+          <img class="share-image-preview" id="shareImagePreview" alt="共有される記録カード画像のプレビュー" />
+          <textarea class="share-preview" id="sharePreview" readonly></textarea>
+          <div class="settings-actions">
+            <button class="ghost-button" id="copyShareButton" type="button">画像保存</button>
+            <button class="primary-button" id="nativeShareButton" type="button">共有</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      const textEl = document.querySelector("#mistakeText");
+      const photoEl = document.querySelector("#photoInput");
+      const previewEl = document.querySelector("#preview");
+      const fileNameEl = document.querySelector("#fileName");
+      const charCountEl = document.querySelector("#charCount");
+      const replyPanel = document.querySelector("#replyPanel");
+      const historyList = document.querySelector("#historyList");
+      const historyCount = document.querySelector("#historyCount");
+      const toast = document.querySelector("#toast");
+      const composerPanel = document.querySelector("#composerPanel");
+      const fabButton = document.querySelector("#fabButton");
+      const dateStrip = document.querySelector("#dateStrip");
+      const calendarHandle = document.querySelector("#calendarHandle");
+      const calendarPanel = document.querySelector("#calendarPanel");
+      const calendarGrid = document.querySelector("#calendarGrid");
+      const filterTitle = document.querySelector("#filterTitle");
+      const profileAvatar = document.querySelector("#profileAvatar");
+      const settingsButton = document.querySelector("#settingsButton");
+      const settingsModal = document.querySelector("#settingsModal");
+      const settingsAvatar = document.querySelector("#settingsAvatar");
+      const avatarInput = document.querySelector("#avatarInput");
+      const nameInput = document.querySelector("#nameInput");
+      const themeOptions = document.querySelector("#themeOptions");
+      const entryIconOptions = document.querySelector("#entryIconOptions");
+      const composerIconOptions = document.querySelector("#composerIconOptions");
+      const subtitle = document.querySelector("#subtitle");
+      const shareModal = document.querySelector("#shareModal");
+      const sharePreview = document.querySelector("#sharePreview");
+      const shareImagePreview = document.querySelector("#shareImagePreview");
+      const nativeShareButton = document.querySelector("#nativeShareButton");
+      const storageKey = "potsuri-entries";
+      const oldStorageKey = "yasashii-hansei-entries";
+      const settingsKey = "potsuri-settings";
+      let photoData = "";
+      let avatarData = "";
+      let selectedTheme = "blue";
+      let selectedEntryIcon = "pen";
+      let selectedComposerIcon = "pen";
+      let selectedDateKey = "";
+      let dragStartY = 0;
+      let suppressHandleClick = false;
+      let visibleEntryCache = [];
+      let currentShareText = "";
+      let currentShareBlob = null;
+      let currentShareFile = null;
+
+      const themes = {
+        blue: { accent: "#abd9df", strong: "#86c2ca", soft: "#e8f5f6" },
+        sage: { accent: "#bed8c6", strong: "#8dbb9a", soft: "#eef7f0" },
+        peach: { accent: "#f0c7bd", strong: "#d99a8d", soft: "#fff0ed" },
+        lavender: { accent: "#d0c7ec", strong: "#a99ad5", soft: "#f2effb" }
+      };
+
+      const entryIcons = {
+        pen: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+        heart: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.7A4 4 0 0 1 19 11c0 5.6-7 10-7 10Z"/></svg>',
+        sparkle: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.8 5.1L19 10l-5.2 1.9L12 17l-1.8-5.1L5 10l5.2-1.9Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8Z"/></svg>',
+        leaf: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14Z"/><path d="M5 19 19 5"/></svg>',
+        moon: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 7 7 0 1 0 20 15.5Z"/></svg>'
+      };
+      const entryIconOrder = ["pen", "heart", "sparkle", "leaf", "moon"];
+
+      const advicePatterns = [
+        {
+          keys: ["忘", "確認", "見落", "抜け", "漏れ"],
+          steps: ["送る前に30秒だけ見直す時間を固定する", "チェック項目を3つだけメモにして毎回なぞる", "急いでいる時ほど最後に声に出して確認する"]
+        },
+        {
+          keys: ["遅刻", "遅れ", "時間", "締切", "期限"],
+          steps: ["次回の開始時刻を10分前に設定する", "前日のうちに必要な物をひとまとめにする", "遅れそうな時の連絡文を定型文にしておく"]
+        },
+        {
+          keys: ["言い方", "怒", "きつ", "会話", "伝え"],
+          steps: ["まず相手の事実と気持ちを一文で受け止める", "要望は短く、責め言葉を入れずに言い直す", "落ち着いてから補足や謝罪を送る"]
+        },
+        {
+          keys: ["忘れ物", "なく", "紛失", "置き"],
+          steps: ["帰る前に見る場所を一つだけ決める", "必需品は同じポーチかポケットに戻す", "玄関や机に小さな定位置を作る"]
+        }
+      ];
+
+      function localDateKey(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function formatDisplayDate(key) {
+        const [year, month, day] = key.split("-").map(Number);
+        return `${month}/${day}`;
+      }
+
+      function addDays(date, amount) {
+        const next = new Date(date);
+        next.setDate(date.getDate() + amount);
+        return next;
+      }
+
+      function addMonths(date, amount) {
+        return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+      }
+
+      function getEntryDateKey(entry) {
+        if (entry.isoDate) return entry.isoDate;
+        const match = String(entry.date || "").match(/(\d{1,2})\/(\d{1,2})/);
+        if (!match) return "";
+        const year = new Date().getFullYear();
+        return `${year}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}`;
+      }
+
+      function getEntries() {
+        try {
+          const current = JSON.parse(localStorage.getItem(storageKey));
+          const source = current || JSON.parse(localStorage.getItem(oldStorageKey)) || [];
+          return source.map((entry) => {
+            const fallbackReply = chooseAdvice(entry.text || "", Boolean(entry.photo));
+            return {
+              ...entry,
+              id: entry.id || `${getEntryDateKey(entry)}-${entry.date || ""}-${entry.text || ""}`,
+              isoDate: getEntryDateKey(entry),
+              replyMessage: entry.replyMessage || fallbackReply.message,
+              replySteps: entry.replySteps || fallbackReply.steps
+            };
+          });
+        } catch {
+          return [];
+        }
+      }
+
+      function saveEntries(entries) {
+        localStorage.setItem(storageKey, JSON.stringify(entries.slice(0, 24)));
+      }
+
+      function updateEntry(entryId, updater) {
+        const entries = getEntries();
+        const next = entries.map((entry) => entry.id === entryId ? updater(entry) : entry);
+        saveEntries(next);
+        renderDates();
+        renderCalendar();
+        renderHistory();
+      }
+
+      function deleteEntry(entryId) {
+        const entries = getEntries().filter((entry) => entry.id !== entryId);
+        saveEntries(entries);
+        renderDates();
+        renderCalendar();
+        renderHistory();
+        showToast("記録を削除しました");
+      }
+
+      function nextEntryIcon(current) {
+        const index = entryIconOrder.indexOf(current);
+        return entryIconOrder[(index + 1) % entryIconOrder.length];
+      }
+
+      function markedDateKeys() {
+        return new Set(getEntries().map(getEntryDateKey).filter(Boolean));
+      }
+
+      function renderDates() {
+        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+        const today = new Date();
+        const start = new Date(today);
+        const marked = markedDateKeys();
+        start.setDate(today.getDate() - today.getDay());
+        dateStrip.innerHTML = weekdays
+          .map((day, index) => {
+            const date = new Date(start);
+            date.setDate(start.getDate() + index);
+            const key = localDateKey(date);
+            const classes = [
+              "date-item",
+              key === localDateKey(today) ? "today" : "",
+              key === selectedDateKey ? "selected" : "",
+              marked.has(key) ? "marked" : ""
+            ].filter(Boolean).join(" ");
+            return `<button class="${classes}" type="button" data-date="${key}"><span>${day}</span><span class="date-number">${date.getDate()}</span></button>`;
+          })
+          .join("");
+      }
+
+      function renderCalendar() {
+        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+        const today = new Date();
+        const marked = markedDateKeys();
+        const base = selectedDateKey ? new Date(`${selectedDateKey}T00:00:00`) : today;
+        calendarGrid.innerHTML = Array.from({ length: 13 }, (_, monthIndex) => {
+          const monthDate = addMonths(base, monthIndex - 6);
+          const year = monthDate.getFullYear();
+          const month = monthDate.getMonth();
+          const first = new Date(year, month, 1);
+          const start = addDays(first, -first.getDay());
+          const weekdayCells = weekdays.map((day) => `<div class="month-weekday">${day}</div>`).join("");
+          const dayCells = Array.from({ length: 42 }, (_, dayIndex) => {
+            const date = addDays(start, dayIndex);
+            const key = localDateKey(date);
+            const classes = [
+              "month-day",
+              date.getMonth() !== month ? "outside" : "",
+              key === localDateKey(today) ? "today" : "",
+              key === selectedDateKey ? "selected" : "",
+              marked.has(key) ? "marked" : ""
+            ].filter(Boolean).join(" ");
+            return `<button class="${classes}" type="button" data-date="${key}"><span class="date-number">${date.getDate()}</span></button>`;
+          }).join("");
+          return `
+            <section class="month-card" data-month="${year}-${String(month + 1).padStart(2, "0")}">
+              <div class="month-title">${year}年${month + 1}月</div>
+              <div class="month-grid">${weekdayCells}${dayCells}</div>
+            </section>
+          `;
+        }).join("");
+      }
+
+      function chooseAdvice(text, hasPhoto) {
+        const match = advicePatterns.find((pattern) => pattern.keys.some((key) => text.includes(key)));
+        const steps = match?.steps || [
+          "ミスが起きた直前の状況を一つだけ書き出す",
+          "次回の自分が迷わない小さな仕組みに変える",
+          "今日できたことも一つ残して終わる"
+        ];
+        const photoLine = hasPhoto ? "写真も残せたので、後から状況を思い出しやすいです。" : "言葉にできた時点で、もう整理は始まっています。";
+        const opener = text.trim()
+          ? "大丈夫。ミスをちゃんと見ようとしている時点で、あなたはもう次に向かっています。"
+          : "大丈夫。うまく言葉にならない日でも、記録しようとしたことには意味があります。";
+
+        return {
+          message: `${opener}${photoLine}今日は責めるより、次の自分が少し楽になる形にしておきましょう。`,
+          steps
+        };
+      }
+
+      function renderHistory() {
+        const entries = getEntries();
+        const visibleEntries = selectedDateKey ? entries.filter((entry) => getEntryDateKey(entry) === selectedDateKey) : entries;
+        visibleEntryCache = visibleEntries;
+        const settings = getSettings();
+        const defaultEntryIcon = settings.entryIcon || "pen";
+        filterTitle.textContent = selectedDateKey ? `${formatDisplayDate(selectedDateKey)} の記録` : "すべて";
+        historyCount.textContent = `${visibleEntries.length}件`;
+        if (!visibleEntries.length) {
+          historyList.innerHTML = `<p class="empty">${selectedDateKey ? "この日の記録はまだありません。" : "まだ記録はありません。小さな失敗も、ここでは次に進む材料です。"}</p>`;
+          return;
+        }
+
+        historyList.innerHTML = visibleEntries
+          .map((entry, index) => {
+            const thumb = entry.photo
+              ? `<img src="${entry.photo}" alt="">`
+              : (entryIcons[entry.entryIcon || defaultEntryIcon] || entryIcons.pen);
+            const text = entry.text || "写真で記録したミス";
+            const steps = entry.replySteps?.length ? `<div>${entry.replySteps.map((step) => `・${escapeHtml(step)}`).join("<br>")}</div>` : "";
+            const advice = entry.replyMessage
+              ? `<div class="entry-advice"><strong>励まし</strong>${escapeHtml(entry.replyMessage)}${steps}</div>`
+              : "";
+            return `
+              <article class="entry">
+                <button class="entry-thumb" type="button" data-icon-entry-id="${escapeHtml(entry.id)}" aria-label="記録アイコンを変更">${thumb}</button>
+                <div class="entry-body">
+                  <div class="entry-text">${escapeHtml(text)}</div>
+                  <div class="entry-meta">${entry.date}</div>
+                  ${advice}
+                </div>
+                <div class="entry-actions">
+                  <button class="share-button" type="button" data-share-index="${index}" aria-label="この記録を共有">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+                      <path d="M16 6 12 2 8 6" />
+                      <path d="M12 2v13" />
+                    </svg>
+                  </button>
+                  <button class="delete-button" type="button" data-delete-entry-id="${escapeHtml(entry.id)}" aria-label="この記録を削除">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="m19 6-1 14H6L5 6" />
+                      <path d="M10 11v5" />
+                      <path d="M14 11v5" />
+                    </svg>
+                  </button>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        })[char]);
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      function getSettings() {
+        try {
+          return JSON.parse(localStorage.getItem(settingsKey)) || {};
+        } catch {
+          return {};
+        }
+      }
+
+      function saveSettings(settings) {
+        localStorage.setItem(settingsKey, JSON.stringify(settings));
+      }
+
+      function renderAvatar(target, data, name) {
+        target.innerHTML = data ? `<img src="${data}" alt="">` : escapeHtml((name || "ぽ").slice(0, 1));
+      }
+
+      function applySettings(settings = getSettings()) {
+        const theme = themes[settings.theme || "blue"] || themes.blue;
+        document.documentElement.style.setProperty("--accent", theme.accent);
+        document.documentElement.style.setProperty("--accent-strong", theme.strong);
+        document.documentElement.style.setProperty("--accent-soft", theme.soft);
+        avatarData = settings.avatar || "";
+        selectedTheme = settings.theme || "blue";
+        selectedEntryIcon = settings.entryIcon || "pen";
+        const name = settings.name || "";
+        subtitle.textContent = name ? `${name}さんのつまずきを、そっと次の一歩に。` : "今日のつまずきを、そっと次の一歩に。";
+        renderAvatar(profileAvatar, avatarData, name || "ぽ");
+        renderAvatar(settingsAvatar, avatarData, name || "ぽ");
+        nameInput.value = name;
+        themeOptions.querySelectorAll(".theme-button").forEach((button) => {
+          button.classList.toggle("selected", button.dataset.theme === selectedTheme);
+        });
+        entryIconOptions.querySelectorAll(".entry-icon-button").forEach((button) => {
+          button.innerHTML = entryIcons[button.dataset.entryIcon] || entryIcons.pen;
+          button.classList.toggle("selected", button.dataset.entryIcon === selectedEntryIcon);
+        });
+        if (!composerPanel.classList.contains("open")) {
+          selectedComposerIcon = selectedEntryIcon;
+        }
+        renderComposerIcons();
+      }
+
+      function renderComposerIcons() {
+        composerIconOptions.querySelectorAll(".entry-icon-button").forEach((button) => {
+          button.innerHTML = entryIcons[button.dataset.entryIcon] || entryIcons.pen;
+          button.classList.toggle("selected", button.dataset.entryIcon === selectedComposerIcon);
+        });
+      }
+
+      function openSettings() {
+        applySettings();
+        settingsModal.classList.add("open");
+        settingsModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeSettings() {
+        settingsModal.classList.remove("open");
+        settingsModal.setAttribute("aria-hidden", "true");
+      }
+
+      function shareTextForEntry(entry) {
+        const text = entry.text || "写真で記録したミス";
+        const steps = entry.replySteps?.length ? `\n\n次の一歩:\n${entry.replySteps.map((step) => `・${step}`).join("\n")}` : "";
+        const reply = entry.replyMessage ? `\n\n励まし:\n${entry.replyMessage}` : "";
+        return `ぽつりの記録 (${entry.date})\n\nミス:\n${text}${reply}${steps}`;
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+      }
+
+      function wrapLines(ctx, text, maxWidth) {
+        const lines = [];
+        String(text).split("\n").forEach((paragraph) => {
+          let line = "";
+          for (const char of paragraph) {
+            const test = line + char;
+            if (ctx.measureText(test).width > maxWidth && line) {
+              lines.push(line);
+              line = char;
+            } else {
+              line = test;
+            }
+          }
+          lines.push(line);
+        });
+        return lines;
+      }
+
+      function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = Infinity) {
+        const lines = wrapLines(ctx, text, maxWidth).slice(0, maxLines);
+        lines.forEach((line, index) => ctx.fillText(line, x, y + index * lineHeight));
+        return y + lines.length * lineHeight;
+      }
+
+      function drawCanvasIcon(ctx, icon, x, y, color) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (icon === "heart") {
+          ctx.beginPath();
+          ctx.moveTo(x + 18, y + 31);
+          ctx.bezierCurveTo(x - 4, y + 18, x + 5, y, x + 18, y + 10);
+          ctx.bezierCurveTo(x + 31, y, x + 40, y + 18, x + 18, y + 31);
+          ctx.stroke();
+        } else if (icon === "sparkle") {
+          ctx.beginPath();
+          ctx.moveTo(x + 18, y + 1);
+          ctx.lineTo(x + 23, y + 14);
+          ctx.lineTo(x + 36, y + 18);
+          ctx.lineTo(x + 23, y + 22);
+          ctx.lineTo(x + 18, y + 35);
+          ctx.lineTo(x + 13, y + 22);
+          ctx.lineTo(x, y + 18);
+          ctx.lineTo(x + 13, y + 14);
+          ctx.closePath();
+          ctx.stroke();
+        } else if (icon === "leaf") {
+          ctx.beginPath();
+          ctx.moveTo(x + 4, y + 32);
+          ctx.bezierCurveTo(x + 6, y + 8, x + 22, y + 2, x + 34, y + 2);
+          ctx.bezierCurveTo(x + 34, y + 16, x + 24, y + 32, x + 4, y + 32);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x + 4, y + 32);
+          ctx.lineTo(x + 34, y + 2);
+          ctx.stroke();
+        } else if (icon === "moon") {
+          ctx.beginPath();
+          ctx.arc(x + 21, y + 18, 16, 0.6, 4.9);
+          ctx.bezierCurveTo(x + 13, y + 18, x + 19, y + 30, x + 34, y + 29);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(x + 3, y + 31);
+          ctx.lineTo(x + 31, y + 3);
+          ctx.lineTo(x + 37, y + 9);
+          ctx.lineTo(x + 9, y + 37);
+          ctx.lineTo(x + 2, y + 39);
+          ctx.lineTo(x + 3, y + 31);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      async function createShareImage(entry) {
+        const settings = getSettings();
+        const theme = themes[settings.theme || "blue"] || themes.blue;
+        const icon = entry.entryIcon || settings.entryIcon || "pen";
+        const scale = 2;
+        const width = 760;
+        const padding = 48;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.font = "300 30px -apple-system, BlinkMacSystemFont, sans-serif";
+        const textLines = wrapLines(ctx, entry.text || "写真で記録したミス", width - padding * 2);
+        ctx.font = "300 25px -apple-system, BlinkMacSystemFont, sans-serif";
+        const replyLines = wrapLines(ctx, entry.replyMessage || chooseAdvice(entry.text || "", Boolean(entry.photo)).message, width - padding * 2 - 36);
+        const steps = entry.replySteps?.length ? entry.replySteps : chooseAdvice(entry.text || "", Boolean(entry.photo)).steps;
+        const stepLines = steps.flatMap((step) => wrapLines(ctx, `・${step}`, width - padding * 2 - 36));
+        const textBlockHeight = textLines.length * 42;
+        const adviceHeight = 102 + replyLines.length * 36 + stepLines.length * 34;
+        const height = 48 + 122 + textBlockHeight + 26 + adviceHeight + 72;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        ctx.scale(scale, scale);
+
+        ctx.fillStyle = "#f5f5f5";
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = "#ffffff";
+        roundRect(ctx, 24, 24, width - 48, height - 48, 36);
+        ctx.fill();
+
+        ctx.fillStyle = theme.soft;
+        roundRect(ctx, padding, padding, 72, 72, 36);
+        ctx.fill();
+        drawCanvasIcon(ctx, icon, padding + 18, padding + 16, "#32565b");
+
+        ctx.fillStyle = "#171d1f";
+        ctx.font = "300 34px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText("ぽつりの記録", padding + 92, padding + 30);
+        ctx.fillStyle = "#8da0a4";
+        ctx.font = "300 22px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText(entry.date, padding + 92, padding + 64);
+
+        let y = padding + 122;
+        ctx.fillStyle = "#171d1f";
+        ctx.font = "300 30px -apple-system, BlinkMacSystemFont, sans-serif";
+        y = drawWrappedText(ctx, entry.text || "写真で記録したミス", padding, y, width - padding * 2, 42) + 26;
+
+        ctx.fillStyle = "#f5fbfb";
+        roundRect(ctx, padding, y, width - padding * 2, adviceHeight, 24);
+        ctx.fill();
+        ctx.fillStyle = "#5d858b";
+        ctx.font = "300 22px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText("励まし", padding + 24, y + 38);
+        ctx.fillStyle = "#536064";
+        ctx.font = "300 25px -apple-system, BlinkMacSystemFont, sans-serif";
+        let adviceY = drawWrappedText(ctx, entry.replyMessage || chooseAdvice(entry.text || "", Boolean(entry.photo)).message, padding + 24, y + 78, width - padding * 2 - 48, 36) + 24;
+        ctx.font = "300 23px -apple-system, BlinkMacSystemFont, sans-serif";
+        drawWrappedText(ctx, steps.map((step) => `・${step}`).join("\n"), padding + 24, adviceY, width - padding * 2 - 48, 34);
+
+        return new Promise((resolve) => {
+          canvas.toBlob((blob) => {
+            const file = new File([blob], `potsuri-${entry.isoDate || "record"}.png`, { type: "image/png" });
+            resolve({ blob, file, dataUrl: canvas.toDataURL("image/png") });
+          }, "image/png");
+        });
+      }
+
+      async function openSharePreview(entry) {
+        currentShareText = shareTextForEntry(entry);
+        const image = await createShareImage(entry);
+        currentShareBlob = image.blob;
+        currentShareFile = image.file;
+        sharePreview.value = currentShareText;
+        shareImagePreview.src = image.dataUrl;
+        shareModal.classList.add("open");
+        shareModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeSharePreview() {
+        shareModal.classList.remove("open");
+        shareModal.setAttribute("aria-hidden", "true");
+      }
+
+      async function copyShareText(text = currentShareText) {
+        if (!currentShareBlob) return;
+        const url = URL.createObjectURL(currentShareBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "potsuri-card.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast("画像を保存します");
+      }
+
+      async function shareCurrentText() {
+        if (!currentShareFile) return;
+        if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [currentShareFile] }))) {
+          await navigator.share({ title: "ぽつりの記録", text: "ぽつりの記録カードです。", files: [currentShareFile] });
+          showToast("画像を共有しました");
+          return;
+        }
+        await copyShareText();
+      }
+
+      function clearComposer() {
+        textEl.value = "";
+        photoEl.value = "";
+        photoData = "";
+        charCountEl.textContent = "0文字";
+        fileNameEl.textContent = "未選択";
+        previewEl.removeAttribute("src");
+        previewEl.style.display = "none";
+      }
+
+      function openComposer() {
+        selectedComposerIcon = getSettings().entryIcon || "pen";
+        renderComposerIcons();
+        composerPanel.classList.add("open");
+        fabButton.classList.add("hidden");
+        textEl.focus();
+        composerPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function closeComposer() {
+        composerPanel.classList.remove("open");
+        fabButton.classList.remove("hidden");
+      }
+
+      function selectDate(key) {
+        selectedDateKey = selectedDateKey === key ? "" : key;
+        renderDates();
+        renderCalendar();
+        renderHistory();
+      }
+
+      function setCalendarOpen(open) {
+        calendarPanel.classList.toggle("open", open);
+        calendarHandle.setAttribute("aria-label", open ? "カレンダーを閉じる" : "カレンダーを開く");
+        if (open) {
+          window.setTimeout(() => {
+            const targetDate = selectedDateKey ? new Date(`${selectedDateKey}T00:00:00`) : new Date();
+            const targetMonth = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}`;
+            const target = calendarGrid.querySelector(`[data-month="${targetMonth}"]`);
+            if (!target) return;
+            calendarGrid.scrollLeft = target.offsetLeft - (calendarGrid.clientWidth - target.clientWidth) / 2;
+          }, 0);
+        }
+      }
+
+      textEl.addEventListener("input", () => {
+        charCountEl.textContent = `${textEl.value.length}文字`;
+      });
+
+      photoEl.addEventListener("change", () => {
+        const file = photoEl.files?.[0];
+        if (!file) {
+          photoData = "";
+          fileNameEl.textContent = "未選択";
+          previewEl.style.display = "none";
+          return;
+        }
+
+        fileNameEl.textContent = file.name;
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          photoData = reader.result;
+          previewEl.src = photoData;
+          previewEl.style.display = "block";
+        });
+        reader.readAsDataURL(file);
+      });
+
+      document.querySelector("#sendButton").addEventListener("click", () => {
+        const text = textEl.value.trim();
+        if (!text && !photoData) {
+          showToast("文章か写真をひとつ入れてください");
+          return;
+        }
+
+        const reply = chooseAdvice(text, Boolean(photoData));
+        const now = new Date();
+        const key = localDateKey(now);
+        const entries = getEntries();
+        entries.unshift({
+          id: `${key}-${Date.now()}`,
+          text,
+          photo: photoData,
+          entryIcon: selectedComposerIcon,
+          isoDate: key,
+          replyMessage: reply.message,
+          replySteps: reply.steps,
+          date: new Intl.DateTimeFormat("ja-JP", {
+            month: "numeric",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          }).format(now)
+        });
+        saveEntries(entries);
+        selectedDateKey = key;
+        replyPanel.classList.remove("show");
+        clearComposer();
+        closeComposer();
+        renderDates();
+        renderCalendar();
+        renderHistory();
+        showToast("最近の記録へ移しました");
+      });
+
+      fabButton.addEventListener("click", openComposer);
+      document.querySelector("#hideComposerButton").addEventListener("click", closeComposer);
+
+      dateStrip.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-date]");
+        if (button) selectDate(button.dataset.date);
+      });
+
+      calendarGrid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-date]");
+        if (button) selectDate(button.dataset.date);
+      });
+
+      historyList.addEventListener("click", (event) => {
+        const iconButton = event.target.closest("[data-icon-entry-id]");
+        if (iconButton) {
+          updateEntry(iconButton.dataset.iconEntryId, (entry) => {
+            const current = entry.entryIcon || getSettings().entryIcon || "pen";
+            const entryIcon = nextEntryIcon(current);
+            showToast("アイコンを変更しました");
+            return { ...entry, entryIcon };
+          });
+          return;
+        }
+
+        const deleteButton = event.target.closest("[data-delete-entry-id]");
+        if (deleteButton) {
+          if (!window.confirm("この記録を削除しますか？")) return;
+          deleteEntry(deleteButton.dataset.deleteEntryId);
+          return;
+        }
+
+        const shareButton = event.target.closest("[data-share-index]");
+        if (!shareButton) return;
+        const entry = visibleEntryCache[Number(shareButton.dataset.shareIndex)];
+        if (!entry) return;
+        openSharePreview(entry);
+      });
+
+      calendarHandle.addEventListener("pointerdown", (event) => {
+        dragStartY = event.clientY;
+        suppressHandleClick = false;
+      });
+
+      calendarHandle.addEventListener("pointerup", (event) => {
+        const distance = event.clientY - dragStartY;
+        if (distance > 28) {
+          suppressHandleClick = true;
+          setCalendarOpen(true);
+        }
+        if (distance < -28) {
+          suppressHandleClick = true;
+          setCalendarOpen(false);
+        }
+      });
+
+      calendarHandle.addEventListener("click", () => {
+        if (suppressHandleClick) {
+          suppressHandleClick = false;
+          return;
+        }
+        setCalendarOpen(!calendarPanel.classList.contains("open"));
+      });
+
+      settingsButton.addEventListener("click", openSettings);
+      document.querySelector("#closeSettingsButton").addEventListener("click", closeSettings);
+      document.querySelector("#cancelSettingsButton").addEventListener("click", closeSettings);
+
+      themeOptions.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-theme]");
+        if (!button) return;
+        selectedTheme = button.dataset.theme;
+        themeOptions.querySelectorAll(".theme-button").forEach((item) => {
+          item.classList.toggle("selected", item === button);
+        });
+      });
+
+      entryIconOptions.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-entry-icon]");
+        if (!button) return;
+        selectedEntryIcon = button.dataset.entryIcon;
+        entryIconOptions.querySelectorAll(".entry-icon-button").forEach((item) => {
+          item.classList.toggle("selected", item === button);
+        });
+      });
+
+      composerIconOptions.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-entry-icon]");
+        if (!button) return;
+        selectedComposerIcon = button.dataset.entryIcon;
+        renderComposerIcons();
+      });
+
+      avatarInput.addEventListener("change", () => {
+        const file = avatarInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          avatarData = reader.result;
+          renderAvatar(settingsAvatar, avatarData, nameInput.value || "ぽ");
+        });
+        reader.readAsDataURL(file);
+      });
+
+      document.querySelector("#clearAvatarButton").addEventListener("click", () => {
+        avatarData = "";
+        avatarInput.value = "";
+        renderAvatar(settingsAvatar, "", nameInput.value || "ぽ");
+      });
+
+      document.querySelector("#saveSettingsButton").addEventListener("click", () => {
+        const settings = {
+          name: nameInput.value.trim(),
+          theme: selectedTheme,
+          avatar: avatarData,
+          entryIcon: selectedEntryIcon
+        };
+        saveSettings(settings);
+        applySettings(settings);
+        renderHistory();
+        closeSettings();
+        showToast("設定を保存しました");
+      });
+
+      document.querySelector("#closeShareButton").addEventListener("click", closeSharePreview);
+      document.querySelector("#copyShareButton").addEventListener("click", () => {
+        copyShareText().catch(() => showToast("コピーできませんでした"));
+      });
+      nativeShareButton.addEventListener("click", () => {
+        shareCurrentText().catch(() => showToast("共有できませんでした"));
+      });
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+
+      renderDates();
+      renderCalendar();
+      applySettings();
+      renderComposerIcons();
+      renderHistory();
+    </script>
+  </body>
+</html>
