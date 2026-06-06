@@ -334,6 +334,7 @@
         border-radius: 99px;
         background: transparent;
         cursor: ns-resize;
+        touch-action: none;
       }
 
       .grabber:focus-visible {
@@ -469,7 +470,7 @@
 
       .actions {
         display: grid;
-        grid-template-columns: 1fr 44px;
+        grid-template-columns: 1fr 46px;
         gap: 10px;
         margin-top: 16px;
       }
@@ -493,6 +494,15 @@
       .ghost-button {
         background: #f7f9f9;
         color: var(--soft-ink);
+      }
+
+      .close-button {
+        width: 46px;
+        min-width: 46px;
+        height: 46px;
+        min-height: 46px;
+        padding: 0;
+        border-radius: 999px;
       }
 
       .reply {
@@ -955,7 +965,7 @@
               </svg>
               励ましをもらう
             </button>
-            <button class="ghost-button" id="hideComposerButton" type="button" aria-label="記録欄を閉じる" title="記録欄を閉じる">
+            <button class="ghost-button close-button" id="hideComposerButton" type="button" aria-label="記録欄を閉じる" title="記録欄を閉じる">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M18 6 6 18" />
                 <path d="m6 6 12 12" />
@@ -995,7 +1005,7 @@
       <section class="settings-panel" aria-labelledby="settingsTitle">
         <div class="settings-head">
           <h2 id="settingsTitle">設定</h2>
-          <button class="ghost-button" id="closeSettingsButton" type="button" aria-label="設定を閉じる">
+          <button class="ghost-button close-button" id="closeSettingsButton" type="button" aria-label="設定を閉じる">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
@@ -1065,7 +1075,7 @@
       <section class="settings-panel" aria-labelledby="shareTitle">
         <div class="settings-head">
           <h2 id="shareTitle">共有プレビュー</h2>
-          <button class="ghost-button" id="closeShareButton" type="button" aria-label="共有プレビューを閉じる">
+          <button class="ghost-button close-button" id="closeShareButton" type="button" aria-label="共有プレビューを閉じる">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
@@ -1127,7 +1137,8 @@
       let selectedComposerIcon = "pen";
       let selectedDateKey = "";
       let dragStartY = 0;
-      let suppressHandleClick = false;
+      let activeHandlePointerId = null;
+      let handleDragResolved = false;
       let visibleEntryCache = [];
       let currentShareText = "";
       let currentShareBlob = null;
@@ -1890,19 +1901,40 @@
 
       calendarHandle.addEventListener("pointerdown", (event) => {
         dragStartY = event.clientY;
-        suppressHandleClick = false;
+        activeHandlePointerId = event.pointerId;
+        handleDragResolved = false;
+        calendarHandle.setPointerCapture?.(event.pointerId);
       });
 
-      calendarHandle.addEventListener("pointerup", (event) => {
+      function handleCalendarDrag(event) {
+        if (activeHandlePointerId !== event.pointerId) return;
+        if (handleDragResolved) return;
         const distance = event.clientY - dragStartY;
         if (distance > 28) {
-          suppressHandleClick = true;
+          handleDragResolved = true;
           setCalendarOpen(true);
         }
         if (distance < -28) {
-          suppressHandleClick = true;
+          handleDragResolved = true;
           setCalendarOpen(false);
         }
+      }
+
+      calendarHandle.addEventListener("pointermove", handleCalendarDrag);
+
+      calendarHandle.addEventListener("pointerup", (event) => {
+        handleCalendarDrag(event);
+        if (activeHandlePointerId !== event.pointerId) return;
+        calendarHandle.releasePointerCapture?.(event.pointerId);
+        activeHandlePointerId = null;
+        handleDragResolved = false;
+      });
+
+      calendarHandle.addEventListener("pointercancel", (event) => {
+        if (activeHandlePointerId !== event.pointerId) return;
+        calendarHandle.releasePointerCapture?.(event.pointerId);
+        activeHandlePointerId = null;
+        handleDragResolved = false;
       });
 
       settingsButton.addEventListener("click", openSettings);
