@@ -35,11 +35,14 @@
 
       html {
         background: var(--page);
+        height: 100%;
+        overflow: hidden;
       }
 
       body {
-        min-height: 100svh;
+        height: 100%;
         margin: 0;
+        overflow: hidden;
         color: var(--ink);
         background: var(--page);
       }
@@ -77,14 +80,17 @@
 
       .app {
         position: relative;
+        display: flex;
+        flex-direction: column;
         width: min(100%, 430px);
-        min-height: 100svh;
+        height: 100svh;
         margin: 0 auto;
-        padding: max(26px, env(safe-area-inset-top)) 0 max(94px, env(safe-area-inset-bottom));
+        padding: max(26px, env(safe-area-inset-top)) 0 0;
         overflow: hidden;
       }
 
       .top {
+        flex: 0 0 auto;
         padding: 0 24px 28px;
       }
 
@@ -307,7 +313,11 @@
       }
 
       .sheet {
-        min-height: calc(100svh - 188px);
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         padding: 14px 22px 96px;
         border-radius: 24px 24px 0 0;
         background: var(--sheet);
@@ -356,6 +366,17 @@
 
       .count {
         color: var(--muted);
+        font-size: 12px;
+      }
+
+      .record-date-chip {
+        display: inline-flex;
+        width: fit-content;
+        margin-bottom: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #55777d;
         font-size: 12px;
       }
 
@@ -798,7 +819,7 @@
         position: fixed;
         right: max(24px, calc((100vw - 430px) / 2 + 24px));
         bottom: calc(24px + env(safe-area-inset-bottom));
-        z-index: 3;
+        z-index: 7;
         width: 54px;
         aspect-ratio: 1;
         background: var(--accent);
@@ -813,7 +834,7 @@
       }
 
       .fab.hidden {
-        display: none;
+        display: grid;
       }
 
       .toast {
@@ -900,6 +921,7 @@
             <h2 id="composerTitle">今日のミス</h2>
             <span class="count" id="charCount">0文字</span>
           </div>
+          <div class="record-date-chip" id="recordDateChip">今日に記録</div>
 
           <textarea id="mistakeText" placeholder="例：急いでいて確認を忘れ、資料に誤字を残してしまった。"></textarea>
 
@@ -1080,6 +1102,7 @@
       const calendarPanel = document.querySelector("#calendarPanel");
       const calendarGrid = document.querySelector("#calendarGrid");
       const filterTitle = document.querySelector("#filterTitle");
+      const recordDateChip = document.querySelector("#recordDateChip");
       const profileAvatar = document.querySelector("#profileAvatar");
       const settingsButton = document.querySelector("#settingsButton");
       const settingsModal = document.querySelector("#settingsModal");
@@ -1129,20 +1152,60 @@
       const advicePatterns = [
         {
           keys: ["忘", "確認", "見落", "抜け", "漏れ"],
-          steps: ["送る前に30秒だけ見直す時間を固定する", "チェック項目を3つだけメモにして毎回なぞる", "急いでいる時ほど最後に声に出して確認する"]
+          steps: [
+            ["送る前に30秒だけ見直す時間を固定する", "チェック項目を3つだけメモにして毎回なぞる", "急いでいる時ほど最後に声に出して確認する"],
+            ["確認するタイミングを作業の最後ではなく途中にも一度入れる", "よく抜ける項目を付箋やメモの先頭に置く", "完璧に見直すより、まず一番大事な一点だけ確認する"]
+          ]
         },
         {
           keys: ["遅刻", "遅れ", "時間", "締切", "期限"],
-          steps: ["次回の開始時刻を10分前に設定する", "前日のうちに必要な物をひとまとめにする", "遅れそうな時の連絡文を定型文にしておく"]
+          steps: [
+            ["次回の開始時刻を10分前に設定する", "前日のうちに必要な物をひとまとめにする", "遅れそうな時の連絡文を定型文にしておく"],
+            ["予定の前に小さなアラームを2つ置く", "移動や準備の見積もりに5分だけ余白を足す", "締切前日の夜に一度だけ進み具合を見る"]
+          ]
         },
         {
           keys: ["言い方", "怒", "きつ", "会話", "伝え"],
-          steps: ["まず相手の事実と気持ちを一文で受け止める", "要望は短く、責め言葉を入れずに言い直す", "落ち着いてから補足や謝罪を送る"]
+          steps: [
+            ["まず相手の事実と気持ちを一文で受け止める", "要望は短く、責め言葉を入れずに言い直す", "落ち着いてから補足や謝罪を送る"],
+            ["すぐ返す前に一呼吸置く合図を決める", "自分の気持ちは「私は」で始めて伝える", "あとから短く補足できれば十分と考える"]
+          ]
         },
         {
           keys: ["忘れ物", "なく", "紛失", "置き"],
-          steps: ["帰る前に見る場所を一つだけ決める", "必需品は同じポーチかポケットに戻す", "玄関や机に小さな定位置を作る"]
+          steps: [
+            ["帰る前に見る場所を一つだけ決める", "必需品は同じポーチかポケットに戻す", "玄関や机に小さな定位置を作る"],
+            ["持ち物を置く場所を毎回同じにする", "出る前に見るチェックを一つだけ作る", "なくしやすい物には目立つ色やタグを付ける"]
+          ]
+        },
+        {
+          keys: ["メール", "送信", "返信", "連絡"],
+          steps: [
+            ["送信前に宛先と添付だけ確認する", "返信は下書きで一度止めてから送る", "よく使う文面はテンプレートにしておく"],
+            ["急ぎの連絡ほど短く事実から書く", "送る前に件名を見直す", "迷う連絡は一文だけメモしてから整える"]
+          ]
+        },
+        {
+          keys: ["お金", "支払", "買", "予約"],
+          steps: [
+            ["決める前に金額と日時をもう一度見る", "予約や支払いはスクショを残す", "迷った時は一晩置けるものか考える"],
+            ["確認画面では日付・金額・相手先だけ見る", "支払い後に通知やメールを一か所へ保存する", "次回の自分用に注意点を一行残す"]
+          ]
         }
+      ];
+
+      const encouragementOpeners = [
+        "大丈夫。ミスをちゃんと見ようとしている時点で、あなたはもう次に向かっています。",
+        "ここに残せたこと自体が、次の自分を助ける準備になっています。",
+        "失敗は気持ちを重くしますが、こうして形にすると少し扱いやすくなります。",
+        "今日は責める日ではなく、次に楽になる工夫を一つ見つける日で十分です。"
+      ];
+
+      const encouragementClosers = [
+        "今日は責めるより、次の自分が少し楽になる形にしておきましょう。",
+        "同じ場面に戻った時、今日の記録が小さな味方になります。",
+        "一気に直そうとしなくて大丈夫です。次の一回だけ、少しやりやすくしましょう。",
+        "できなかったことだけでなく、気づけたこともちゃんと前進です。"
       ];
 
       function localDateKey(date = new Date()) {
@@ -1155,6 +1218,18 @@
       function formatDisplayDate(key) {
         const [year, month, day] = key.split("-").map(Number);
         return `${month}/${day}`;
+      }
+
+      function formatEntryDate(key, time = new Date()) {
+        const [, month, day] = key.split("-").map(Number);
+        const hour = String(time.getHours()).padStart(2, "0");
+        const minute = String(time.getMinutes()).padStart(2, "0");
+        return `${month}/${day} ${hour}:${minute}`;
+      }
+
+      function updateRecordDateChip() {
+        const key = selectedDateKey || localDateKey();
+        recordDateChip.textContent = key === localDateKey() ? "今日に記録" : `${formatDisplayDate(key)} に記録`;
       }
 
       function addDays(date, amount) {
@@ -1282,18 +1357,28 @@
 
       function chooseAdvice(text, hasPhoto) {
         const match = advicePatterns.find((pattern) => pattern.keys.some((key) => text.includes(key)));
-        const steps = match?.steps || [
+        const seed = Array.from(text || "ぽつり").reduce((sum, char) => sum + char.charCodeAt(0), hasPhoto ? 7 : 0);
+        const fallbackSteps = [
           "ミスが起きた直前の状況を一つだけ書き出す",
           "次回の自分が迷わない小さな仕組みに変える",
           "今日できたことも一つ残して終わる"
         ];
+        const variants = match?.steps || [fallbackSteps, [
+          "次に同じ場面が来た時の合図を一つ決める",
+          "大きな反省より小さな予防策を一つ置く",
+          "うまくいった部分も一緒に記録しておく"
+        ], [
+          "原因を人ではなく状況から探してみる",
+          "次回の手順を一つだけ短くする",
+          "疲れている時の代替案を用意しておく"
+        ]];
+        const steps = variants[seed % variants.length];
         const photoLine = hasPhoto ? "写真も残せたので、後から状況を思い出しやすいです。" : "言葉にできた時点で、もう整理は始まっています。";
-        const opener = text.trim()
-          ? "大丈夫。ミスをちゃんと見ようとしている時点で、あなたはもう次に向かっています。"
-          : "大丈夫。うまく言葉にならない日でも、記録しようとしたことには意味があります。";
+        const opener = text.trim() ? encouragementOpeners[seed % encouragementOpeners.length] : "大丈夫。うまく言葉にならない日でも、記録しようとしたことには意味があります。";
+        const closer = encouragementClosers[(seed + 1) % encouragementClosers.length];
 
         return {
-          message: `${opener}${photoLine}今日は責めるより、次の自分が少し楽になる形にしておきましょう。`,
+          message: `${opener}${photoLine}${closer}`,
           steps
         };
       }
@@ -1522,6 +1607,15 @@
         ctx.restore();
       }
 
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = src;
+        });
+      }
+
       async function createShareImage(entry) {
         const settings = getSettings();
         const theme = themes[settings.theme || "blue"] || themes.blue;
@@ -1529,17 +1623,20 @@
         const scale = 2;
         const width = 760;
         const padding = 48;
+        const text = entry.text || "写真で記録したミス";
+        const message = entry.replyMessage || chooseAdvice(entry.text || "", Boolean(entry.photo)).message;
+        const steps = entry.replySteps?.length ? entry.replySteps : chooseAdvice(entry.text || "", Boolean(entry.photo)).steps;
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         ctx.font = "300 30px -apple-system, BlinkMacSystemFont, sans-serif";
-        const textLines = wrapLines(ctx, entry.text || "写真で記録したミス", width - padding * 2);
+        const bodyWidth = width - padding * 2 - 118;
+        const textLines = wrapLines(ctx, text, bodyWidth);
         ctx.font = "300 25px -apple-system, BlinkMacSystemFont, sans-serif";
-        const replyLines = wrapLines(ctx, entry.replyMessage || chooseAdvice(entry.text || "", Boolean(entry.photo)).message, width - padding * 2 - 36);
-        const steps = entry.replySteps?.length ? entry.replySteps : chooseAdvice(entry.text || "", Boolean(entry.photo)).steps;
-        const stepLines = steps.flatMap((step) => wrapLines(ctx, `・${step}`, width - padding * 2 - 36));
-        const textBlockHeight = textLines.length * 42;
-        const adviceHeight = 102 + replyLines.length * 36 + stepLines.length * 34;
-        const height = 48 + 122 + textBlockHeight + 26 + adviceHeight + 72;
+        const replyLines = wrapLines(ctx, message, bodyWidth - 44);
+        const stepLines = steps.flatMap((step) => wrapLines(ctx, `・${step}`, bodyWidth - 44));
+        const adviceHeight = 72 + replyLines.length * 34 + stepLines.length * 32;
+        const contentHeight = textLines.length * 38 + 54 + 24 + adviceHeight;
+        const height = padding * 2 + Math.max(160, contentHeight);
         canvas.width = width * scale;
         canvas.height = height * scale;
         ctx.scale(scale, scale);
@@ -1547,40 +1644,66 @@
         ctx.fillStyle = "#f5f5f5";
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = "#ffffff";
-        roundRect(ctx, 24, 24, width - 48, height - 48, 36);
+        roundRect(ctx, 24, 24, width - 48, height - 48, 28);
         ctx.fill();
 
+        const iconX = padding + 18;
+        const iconY = padding + 18;
         ctx.fillStyle = theme.soft;
-        roundRect(ctx, padding, padding, 72, 72, 36);
+        roundRect(ctx, iconX, iconY, 84, 84, 42);
         ctx.fill();
-        drawCanvasIcon(ctx, icon, padding + 18, padding + 16, "#32565b");
+        if (entry.photo) {
+          try {
+            const photoImage = await loadImage(entry.photo);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(iconX + 42, iconY + 42, 42, 0, Math.PI * 2);
+            ctx.clip();
+            const photoSize = Math.min(photoImage.width, photoImage.height);
+            const sx = (photoImage.width - photoSize) / 2;
+            const sy = (photoImage.height - photoSize) / 2;
+            ctx.drawImage(photoImage, sx, sy, photoSize, photoSize, iconX, iconY, 84, 84);
+            ctx.restore();
+          } catch {
+            drawCanvasIcon(ctx, icon, iconX + 23, iconY + 22, "#32565b");
+          }
+        } else {
+          drawCanvasIcon(ctx, icon, iconX + 23, iconY + 22, "#32565b");
+        }
 
+        const bodyX = padding + 126;
+        let y = padding + 22;
         ctx.fillStyle = "#171d1f";
-        ctx.font = "300 34px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.fillText("ぽつりの記録", padding + 92, padding + 30);
+        ctx.font = "300 28px -apple-system, BlinkMacSystemFont, sans-serif";
+        y = drawWrappedText(ctx, text, bodyX, y, bodyWidth, 38) + 14;
+
+        const metaWidth = Math.max(112, ctx.measureText(entry.date).width + 30);
+        ctx.fillStyle = "#eef5f5";
+        roundRect(ctx, bodyX, y, metaWidth, 32, 16);
+        ctx.fill();
         ctx.fillStyle = "#8da0a4";
-        ctx.font = "300 22px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.fillText(entry.date, padding + 92, padding + 64);
-
-        let y = padding + 122;
-        ctx.fillStyle = "#171d1f";
-        ctx.font = "300 30px -apple-system, BlinkMacSystemFont, sans-serif";
-        y = drawWrappedText(ctx, entry.text || "写真で記録したミス", padding, y, width - padding * 2, 42) + 26;
+        ctx.font = "300 20px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText(entry.date, bodyX + 15, y + 22);
+        y += 56;
 
         ctx.fillStyle = "#f5fbfb";
-        roundRect(ctx, padding, y, width - padding * 2, adviceHeight, 24);
+        roundRect(ctx, bodyX, y, bodyWidth, adviceHeight, 20);
         ctx.fill();
         ctx.fillStyle = "#5d858b";
-        ctx.font = "300 22px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.fillText("励まし", padding + 24, y + 38);
+        ctx.font = "300 20px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText("励まし", bodyX + 22, y + 34);
         ctx.fillStyle = "#536064";
-        ctx.font = "300 25px -apple-system, BlinkMacSystemFont, sans-serif";
-        let adviceY = drawWrappedText(ctx, entry.replyMessage || chooseAdvice(entry.text || "", Boolean(entry.photo)).message, padding + 24, y + 78, width - padding * 2 - 48, 36) + 24;
         ctx.font = "300 23px -apple-system, BlinkMacSystemFont, sans-serif";
-        drawWrappedText(ctx, steps.map((step) => `・${step}`).join("\n"), padding + 24, adviceY, width - padding * 2 - 48, 34);
+        let adviceY = drawWrappedText(ctx, message, bodyX + 22, y + 72, bodyWidth - 44, 34) + 18;
+        ctx.font = "300 21px -apple-system, BlinkMacSystemFont, sans-serif";
+        drawWrappedText(ctx, steps.map((step) => `・${step}`).join("\n"), bodyX + 22, adviceY, bodyWidth - 44, 32);
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("画像を生成できませんでした"));
+              return;
+            }
             const file = new File([blob], `potsuri-${entry.isoDate || "record"}.png`, { type: "image/png" });
             resolve({ blob, file, dataUrl: canvas.toDataURL("image/png") });
           }, "image/png");
@@ -1639,19 +1762,19 @@
       function openComposer() {
         selectedComposerIcon = getSettings().entryIcon || "pen";
         renderComposerIcons();
+        updateRecordDateChip();
         composerPanel.classList.add("open");
-        fabButton.classList.add("hidden");
         textEl.focus();
         composerPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
 
       function closeComposer() {
         composerPanel.classList.remove("open");
-        fabButton.classList.remove("hidden");
       }
 
       function selectDate(key) {
         selectedDateKey = selectedDateKey === key ? "" : key;
+        updateRecordDateChip();
         renderDates();
         renderCalendar();
         renderHistory();
@@ -1703,7 +1826,7 @@
 
         const reply = chooseAdvice(text, Boolean(photoData));
         const now = new Date();
-        const key = localDateKey(now);
+        const key = selectedDateKey || localDateKey(now);
         const entries = getEntries();
         entries.unshift({
           id: `${key}-${Date.now()}`,
@@ -1713,12 +1836,7 @@
           isoDate: key,
           replyMessage: reply.message,
           replySteps: reply.steps,
-          date: new Intl.DateTimeFormat("ja-JP", {
-            month: "numeric",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-          }).format(now)
+          date: formatEntryDate(key, now)
         });
         saveEntries(entries);
         selectedDateKey = key;
@@ -1785,14 +1903,6 @@
           suppressHandleClick = true;
           setCalendarOpen(false);
         }
-      });
-
-      calendarHandle.addEventListener("click", () => {
-        if (suppressHandleClick) {
-          suppressHandleClick = false;
-          return;
-        }
-        setCalendarOpen(!calendarPanel.classList.contains("open"));
       });
 
       settingsButton.addEventListener("click", openSettings);
