@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="112" fill="#f5f5f5"/>
-  <circle cx="256" cy="256" r="124" fill="#abd9df"/>
-  <path fill="none" stroke="#173236" stroke-linecap="round" stroke-linejoin="round" stroke-width="30" d="M256 182v148M182 256h148"/>
+  <path fill="#abd9df" d="M106 239c0-78 67-136 150-136s150 58 150 136-67 136-150 136c-18 0-35-3-51-8l-73 39 25-67c-32-25-51-60-51-100Z"/>
+  <path fill="#f8ffff" d="M136 234c0-58 52-101 120-101s120 43 120 101-52 101-120 101c-15 0-30-2-43-7l-43 23 15-40c-30-19-49-47-49-77Z"/>
+  <text x="256" y="275" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif" font-size="130" font-weight="300" fill="#173236">ぽ</text>
 </svg>
